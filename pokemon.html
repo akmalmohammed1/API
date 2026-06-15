@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: Arial;
+        }
+        .pokemonData {
+            border: 1px solid #ccc;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Battle Arena</h1>
+    <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap: 200px;">
+        <div id="pokemonData1" class="pokemonData">
+
+            <button onclick="fetchPokemonData('pokemonData1')">Get random Pokemon</button>
+        </div>
+        <div id="pokemonData2" class="pokemonData">
+            <button onclick="fetchPokemonData('pokemonData2')">Get random Pokemon</button>
+
+        </div>
+
+    </div>
+    <button onclick="startBattle()">Start Battle</button>
+
+    <script>
+        const getRandomInt = (min, max) => {
+            min=Math.ceil(min);
+            max=Math.floor(max);
+            return Math.floor(Math.random()*(max-min+1))+min;
+        }
+        const fetchPokemonData = async (targetId) => {
+            try {
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${getRandomInt(1, 200)}`)
+                if (!response.ok) {
+                    throw new Error("Pokemon Not found")
+                }
+                const data = await response.json()
+                const pokemonDataDiv = document.getElementById(targetId)
+                const hp=data.stats[0].base_stat
+                const attack=data.stats[1].base_stat
+                const defense=data.stats[2].base_stat
+                pokemonDataDiv.innerHTML = `
+            <img src="${data.sprites.front_default}" alt="${data.name}">    
+            <h2>${data.name}</h2>
+            type: ${data.types[0].type.name}
+            <div style="display:flex; flex-direction:row; justify-content:center; gap: 20px;">
+                <p>HP: ${hp}</p>
+                <p>Attack: ${attack}</p>
+                <p>Defense: ${defense}</p>
+            </div>
+            <div style="display:flex; flex-direction:row; align-items:center; justify-content:center;">
+                <h3>Moves:</h3>
+                <ul>
+                    <li>${data.moves[0].move.name} </li>
+                    <li>${data.moves[1].move.name} </li>
+                    <li>${data.moves[2].move.name} </li>
+                </ul>
+            </div>
+        `
+            }
+            catch (error) {
+                console.log(error)
+            }
+        }
+      
+        const resetBattle = () => {
+            document.getElementById('pokemonData1').innerHTML = `<button onclick="fetchPokemonData('pokemonData1')">Get random Pokemon</button>`;
+            document.getElementById('pokemonData2').innerHTML = `<button onclick="fetchPokemonData('pokemonData2')">Get random Pokemon</button>`;
+        }
+        const startBattle = () => {
+            const pokemon1 = document.getElementById('pokemonData1');
+            const pokemon2 = document.getElementById('pokemonData2');
+
+            if (pokemon1.innerHTML && pokemon2.innerHTML) {
+                const hp1 = parseInt(pokemon1.querySelector('p:nth-child(1)').textContent.split(': ')[1]);
+                const hp2 = parseInt(pokemon2.querySelector('p:nth-child(1)').textContent.split(': ')[1]);
+
+                if (hp1 > hp2) {
+                    alert(`${pokemon1.querySelector('h2').textContent} wins!`);
+                    resetBattle();
+                } else if (hp2 > hp1) {
+                    alert(`${pokemon2.querySelector('h2').textContent} wins!`);
+                    resetBattle();
+                } else {
+                    alert("It's a tie!");
+                    resetBattle();
+                }
+            } else {
+                alert("Please select both Pokemon before starting the battle.");
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
